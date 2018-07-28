@@ -25,8 +25,16 @@ Write `{{include xxx.tpl}}` in the template file.
 <!DOCTYPE html>
 <html><body>
     <h1>Test code</h1>
-    {{template "footer"}}{{include footer.tpl}}
+{{template "footer"}}{{include "footer.tpl"}}
 </body></html>
+```
+
+```html
+[footer.tpl]
+
+{{define "footer"}}
+	<p>Footer</p>
+{{end}}
 ```
 All you have to do is parse the parent file with the prepared method.
 ```go

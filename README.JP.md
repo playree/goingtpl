@@ -24,8 +24,16 @@ go get github.com/playree/goingtpl
 <!DOCTYPE html>
 <html><body>
     <h1>Test code</h1>
-    {{template "footer"}}{{include footer.tpl}}
+{{template "footer"}}{{include "footer.tpl"}}
 </body></html>
+```
+
+```html
+[footer.tpl]
+
+{{define "footer"}}
+	<p>Footer</p>
+{{end}}
 ```
 あとは下記のように専用のパースメソッドを使用して、親となるテンプレートファイルをパースするだけで、`include`指定したファイルも一緒にパースされます。
 ```go
