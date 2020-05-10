@@ -32,7 +32,7 @@ go get github.com/playree/goingtpl
 [footer.html]
 
 {{define "footer"}}
-	<p>Footer</p>
+    <p>Footer</p>
 {{end}}
 ```
 
@@ -47,7 +47,7 @@ tpl := template.Must(goingtpl.ParseFile("parent.html"))
 <!DOCTYPE html>
 <html><body>
     <h1>Test code</h1>
-	<p>Footer</p>
+    <p>Footer</p>
 </body></html>
 ```
 
@@ -58,11 +58,11 @@ tpl := template.Must(goingtpl.ParseFile("parent.html"))
 
 <!DOCTYPE html>
 <html><body>
-	<h1>{{template "title" .}}</h1>
+    <h1>{{template "title" .}}</h1>
     <div style="background-color: #ddf;">
-		{{template "content" .}}
-	</div>
-	<p>Footer</p>
+        {{template "content" .}}
+    </div>
+    <p>Footer</p>
 </body></html>
 ```
 
@@ -72,7 +72,7 @@ tpl := template.Must(goingtpl.ParseFile("parent.html"))
 {{extends "base.html"}}
 {{define "title"}}Page1{{end}}
 {{define "content"}}
-	<p>This is Page1.</p>
+    <p>This is Page1.</p>
 {{end}}
 ```
 
@@ -88,11 +88,11 @@ tpl := template.Must(goingtpl.ParseFile("page1.html"))
 ```html
 <!DOCTYPE html>
 <html><body>
-	<h1>Page1</h1>
+    <h1>Page1</h1>
     <div style="background-color: #ddf;">
-		<p>This is Page1.</p>
-	</div>
-	<p>Footer</p>
+        <p>This is Page1.</p>
+    </div>
+    <p>Footer</p>
 </body></html>
 ```
 
@@ -144,7 +144,7 @@ func main() {
 		},
 	)
 
-	http.HandleFunc("/example1", handleExample)
+	http.HandleFunc("/example1", handleExample1)
 	http.HandleFunc("/example2", handleExample2)
 	http.HandleFunc("/clear", handleClear)
 	log.Fatal(http.ListenAndServe(":8088", nil))
@@ -260,11 +260,11 @@ templates/parts/base.html
 ```html
 <!DOCTYPE html>
 <html><body>
-	<h1>{{template "title" .}}</h1>
-	<p>This is a sample of extends.</p>
-	<div style="background-color: #ddf;">
-		{{template "content" .}}
-	</div>
+    <h1>{{template "title" .}}</h1>
+    <p>This is a sample of extends.</p>
+    <div style="background-color: #ddf;">
+        {{template "content" .}}
+    </div>
 </body></html>
 ```
 
@@ -273,10 +273,10 @@ templates/page1.html
 {{extends "parts/base.html"}}
 {{define "title"}}Page1{{end}}
 {{define "content"}}
-	This is Page1.
-	<p>
-		Loaded {{.Date}} {{.Time}}
-	</p>
+    This is Page1.
+    <p>
+        Loaded {{.Date}} {{.Time}}
+    </p>
 {{end}}
 ```
 

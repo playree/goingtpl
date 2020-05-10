@@ -33,7 +33,7 @@ Write `{{include "xxx.html"}}` in the template file.
 [footer.html]
 
 {{define "footer"}}
-	<p>Footer</p>
+    <p>Footer</p>
 {{end}}
 ```
 All you have to do is parse the parent file with the prepared method.
@@ -46,7 +46,7 @@ After parsing.
 <!DOCTYPE html>
 <html><body>
     <h1>Test code</h1>
-	<p>Footer</p>
+    <p>Footer</p>
 </body></html>
 ```
 
@@ -57,11 +57,11 @@ Write `{{extends "xxx.html"}}` in the template file.
 
 <!DOCTYPE html>
 <html><body>
-	<h1>{{template "title" .}}</h1>
+    <h1>{{template "title" .}}</h1>
     <div style="background-color: #ddf;">
-		{{template "content" .}}
-	</div>
-	<p>Footer</p>
+        {{template "content" .}}
+    </div>
+    <p>Footer</p>
 </body></html>
 ```
 
@@ -71,7 +71,7 @@ Write `{{extends "xxx.html"}}` in the template file.
 {{extends "base.html"}}
 {{define "title"}}Page1{{end}}
 {{define "content"}}
-	<p>This is Page1.</p>
+    <p>This is Page1.</p>
 {{end}}
 ```
 
@@ -87,11 +87,11 @@ After parsing.
 ```html
 <!DOCTYPE html>
 <html><body>
-	<h1>Page1</h1>
+    <h1>Page1</h1>
     <div style="background-color: #ddf;">
-		<p>This is Page1.</p>
-	</div>
-	<p>Footer</p>
+        <p>This is Page1.</p>
+    </div>
+    <p>Footer</p>
 </body></html>
 ```
 
@@ -173,6 +173,7 @@ func handleExample2(w http.ResponseWriter, r *http.Request) {
 	start := time.Now().UnixNano()
 
 	tpl := template.Must(goingtpl.ParseFileFuncs("page1.html", nil))
+
 	// If you do not add a function
 	// e.g. goingtpl.ParseFile("xxx.html")
 
@@ -254,11 +255,11 @@ templates/parts/base.html
 ```html
 <!DOCTYPE html>
 <html><body>
-	<h1>{{template "title" .}}</h1>
-	<p>This is a sample of extends.</p>
-	<div style="background-color: #ddf;">
-		{{template "content" .}}
-	</div>
+    <h1>{{template "title" .}}</h1>
+    <p>This is a sample of extends.</p>
+    <div style="background-color: #ddf;">
+        {{template "content" .}}
+    </div>
 </body></html>
 ```
 
@@ -267,10 +268,10 @@ templates/page1.html
 {{extends "parts/base.html"}}
 {{define "title"}}Page1{{end}}
 {{define "content"}}
-	This is Page1.
-	<p>
-		Loaded {{.Date}} {{.Time}}
-	</p>
+    This is Page1.
+    <p>
+        Loaded {{.Date}} {{.Time}}
+    </p>
 {{end}}
 ```
 
