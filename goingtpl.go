@@ -52,14 +52,14 @@ func AddFixedFunc(name string, fnc interface{}) {
 
 // ParseFile is template parser that supports file inclusion.
 // If BaseDIr is specified, specify a file path based on BaseDir.
-// e.g. {{include "xxx.tpl"}}
+// e.g. {{include "xxx.html"}}
 func ParseFile(filename string) (*template.Template, error) {
 	return ParseFileFuncs(filename, template.FuncMap{})
 }
 
 // ParseFileFuncs is template parser that supports file inclusion.
 // If BaseDIr is specified, specify a file path based on BaseDir.
-// e.g. {{include "xxx.tpl"}}
+// e.g. {{include "xxx.html"}}
 func ParseFileFuncs(filename string, funcs template.FuncMap) (*template.Template, error) {
 	if cacheON {
 		// search template cache

@@ -34,10 +34,10 @@ func handleExample(w http.ResponseWriter, r *http.Request) {
 		"repeat": func(s string, i int) string {
 			return strings.Repeat(s, i)
 		}}
-	tpl := template.Must(goingtpl.ParseFileFuncs("parent.tpl", funcMap))
+	tpl := template.Must(goingtpl.ParseFileFuncs("parent.html", funcMap))
 
 	// If you do not add a function
-	// e.g. goingtpl.ParseFile("xxx.tpl")
+	// e.g. goingtpl.ParseFile("xxx.html")
 
 	m := map[string]string{
 		"Date": time.Now().Format("2006-01-02"),

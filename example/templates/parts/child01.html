@@ -1,0 +1,8 @@
+{{define "child01"}}
+<div>
+    child01.html {{.Date}} {{.Time}}
+    <div style="padding-left: 2rem;">
+        {{template "child03-1"}}{{include "parts/child03.html"}}
+    </div>
+</div>
+{{end}}

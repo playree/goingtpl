@@ -17,19 +17,19 @@ go get github.com/playree/goingtpl
 
 ## Usage
 ### テンプレートのインクルード機能
-テンプレートファイルに`{{include xxx.tpl}}`を記述します。
+テンプレートファイルに`{{include xxx.html}}`を記述します。
 ```html
-[parent.tpl]
+[parent.html]
 
 <!DOCTYPE html>
 <html><body>
     <h1>Test code</h1>
-{{template "footer"}}{{include "footer.tpl"}}
+{{template "footer"}}{{include "footer.html"}}
 </body></html>
 ```
 
 ```html
-[footer.tpl]
+[footer.html]
 
 {{define "footer"}}
 	<p>Footer</p>
@@ -37,7 +37,7 @@ go get github.com/playree/goingtpl
 ```
 あとは下記のように専用のパースメソッドを使用して、親となるテンプレートファイルをパースするだけで、`include`指定したファイルも一緒にパースされます。
 ```go
-tpl := template.Must(goingtpl.ParseFile("parent.tpl"))
+tpl := template.Must(goingtpl.ParseFile("parent.html"))
 ```
 
 ### テンプレートのキャッシュ機能
@@ -100,9 +100,9 @@ func handleExample(w http.ResponseWriter, r *http.Request) {
 		"repeat": func(s string, i int) string {
 			return strings.Repeat(s, i)
 		}}
-	tpl := template.Must(goingtpl.ParseFileFuncs("parent.tpl", funcMap))
+	tpl := template.Must(goingtpl.ParseFileFuncs("parent.html", funcMap))
 	// If you do not add a function
-	// e.g. goingtpl.ParseFile("xxx.tpl")
+	// e.g. goingtpl.ParseFile("xxx.html")
 
 	m := map[string]string{
 		"Date": time.Now().Format("2006-01-02"),
@@ -120,55 +120,55 @@ func handleClear(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-templates/parent.tpl
+templates/parent.html
 ```html
 <!DOCTYPE html>
 <html><body>
-    <div>parent.tpl</div>
+    <div>parent.html</div>
     <div style="padding-left: 2rem;">
-        {{template "child01"}}{{include "parts/child01.tpl"}}
-        {{template "child02-1"}}{{include "parts/child02.tpl"}}
+        {{template "child01"}}{{include "parts/child01.html"}}
+        {{template "child02-1"}}{{include "parts/child02.html"}}
         {{template "child02-2" .}}
     </div>
 </body></html>
 ```
 
-templates/child01.tpl
+templates/child01.html
 ```html
 {{define "child01"}}
 <div>
-    child01.tpl {{.Date}} {{.Time}}
+    child01.html {{.Date}} {{.Time}}
     <div style="padding-left: 2rem;">
-        {{template "child03-1"}}{{include "parts/child03.tpl"}}
+        {{template "child03-1"}}{{include "parts/child03.html"}}
     </div>
 </div>
 {{end}}
 ```
 
-templates/child02.tpl
+templates/child02.html
 ```html
 {{define "child02-1"}}
-<div>child02.tpl - 1</div>
+<div>child02.html - 1</div>
 {{end}}
 
 {{define "child02-2"}}
 <div>
-    child02.tpl - 2
+    child02.html - 2
     <div style="padding-left: 2rem;">
-        {{template "child03-2" .}}{{include "parts/child03.tpl"}}
+        {{template "child03-2" .}}{{include "parts/child03.html"}}
     </div>
 </div>
 {{end}}
 ```
 
-templates/child03.tpl
+templates/child03.html
 ```html
 {{define "child03-1"}}
-<i>child03.tpl - 1</i>
+<i>child03.html - 1</i>
 {{end}}
 
 {{define "child03-2"}}
-<i>child03.tpl - 2 </i><br>
+<i>child03.html - 2 </i><br>
 Arguments = {{.Date}} {{.Time}}<br>
 Func now = {{now}}<br>
 Func repeat = {{repeat "A" 5}}
