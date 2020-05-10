@@ -11,13 +11,15 @@ const (
 	leftDelim         = "{{"
 	rightDelim        = "}}"
 	includeFuncString = "include"
+	extendsFuncString = "extends"
 )
 
 var baseDir = ""
 var cacheON = false
 var tplCache = map[string]*template.Template{}
 var funcMap = template.FuncMap{
-	"include": func(templatefile string) string { return "" },
+	includeFuncString: func(templatefile string) string { return "" },
+	extendsFuncString: func(templatefile string) string { return "" },
 }
 
 // SetBaseDir Specify the directory where the template is placed.
@@ -92,6 +94,11 @@ func nextParse(tpl *template.Template, filename string, comp map[string]bool) (*
 	}
 	contents := string(buf)
 
+	contents, tpl, err = nextExt(tpl, contents, comp)
+	if err != nil {
+		return nil, err
+	}
+
 	tpl, err = tpl.Parse(contents)
 	if err != nil {
 		return nil, err
@@ -125,4 +132,19 @@ func nextInc(contents string, list []string) []string {
 		}
 	}
 	return list
+}
+
+func nextExt(tpl *template.Template, contents string, comp map[string]bool) (string, *template.Template, error) {
+	if start := strings.Index(contents, leftDelim); start >= 0 {
+		start += 2
+		if end := strings.Index(contents[start:], rightDelim); end >= 0 {
+			end += start
+			param := strings.Fields(contents[start:end])
+			if len(param) == 2 && param[0] == extendsFuncString {
+				tpl, err := nextParse(tpl, strings.Trim(param[1], `"`), comp)
+				return contents[end+2:], tpl, err
+			}
+		}
+	}
+	return contents, tpl, nil
 }

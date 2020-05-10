@@ -22,12 +22,14 @@ func main() {
 		},
 	)
 
-	http.HandleFunc("/example", handleExample)
+	http.HandleFunc("/example1", handleExample1)
+	http.HandleFunc("/example2", handleExample2)
+	http.HandleFunc("/example3", handleExample3)
 	http.HandleFunc("/clear", handleClear)
 	log.Fatal(http.ListenAndServe(":8088", nil))
 }
 
-func handleExample(w http.ResponseWriter, r *http.Request) {
+func handleExample1(w http.ResponseWriter, r *http.Request) {
 	start := time.Now().UnixNano()
 
 	funcMap := template.FuncMap{
@@ -44,6 +46,48 @@ func handleExample(w http.ResponseWriter, r *http.Request) {
 		"Time": time.Now().Format("15:04:05"),
 	}
 	tpl.Execute(w, m)
+
+	fmt.Printf("ExecTime=%d MicroSec\n",
+		(time.Now().UnixNano()-start)/int64(time.Microsecond))
+}
+
+func handleExample2(w http.ResponseWriter, r *http.Request) {
+	start := time.Now().UnixNano()
+
+	tpl := template.Must(goingtpl.ParseFileFuncs("page1.html", nil))
+
+	// If you do not add a function
+	// e.g. goingtpl.ParseFile("xxx.html")
+
+	m := map[string]string{
+		"Date": time.Now().Format("2006-01-02"),
+		"Time": time.Now().Format("15:04:05"),
+	}
+	err := tpl.Execute(w, m)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("ExecTime=%d MicroSec\n",
+		(time.Now().UnixNano()-start)/int64(time.Microsecond))
+}
+
+func handleExample3(w http.ResponseWriter, r *http.Request) {
+	start := time.Now().UnixNano()
+
+	tpl := template.Must(goingtpl.ParseFileFuncs("page2.html", nil))
+
+	// If you do not add a function
+	// e.g. goingtpl.ParseFile("xxx.html")
+
+	m := map[string]string{
+		"Date": time.Now().Format("2006-01-02"),
+		"Time": time.Now().Format("15:04:05"),
+	}
+	err := tpl.Execute(w, m)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("ExecTime=%d MicroSec\n",
 		(time.Now().UnixNano()-start)/int64(time.Microsecond))

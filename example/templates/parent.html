@@ -2,8 +2,8 @@
 <html><body>
     <div>parent.html</div>
     <div style="padding-left: 2rem;">
-        {{template "child01"}}{{include "parts/child01.html"}}
-        {{template "child02-1"}}{{include "parts/child02.html"}}
+        {{template "child01" .}}{{include "parts/child01.html"}}
+        {{template "child02-1" .}}{{include "parts/child02.html"}}
         {{template "child02-2" .}}
     </div>
 </body></html>

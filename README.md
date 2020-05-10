@@ -85,12 +85,12 @@ func main() {
 		},
 	)
 
-	http.HandleFunc("/example", handleExample)
+	http.HandleFunc("/example1", handleExample1)
 	http.HandleFunc("/clear", handleClear)
 	log.Fatal(http.ListenAndServe(":8088", nil))
 }
 
-func handleExample(w http.ResponseWriter, r *http.Request) {
+func handleExample1(w http.ResponseWriter, r *http.Request) {
 	start := time.Now().UnixNano()
 
 	funcMap := template.FuncMap{
@@ -123,8 +123,8 @@ templates/parent.html
 <html><body>
     <div>parent.html</div>
     <div style="padding-left: 2rem;">
-        {{template "child01"}}{{include "parts/child01.html"}}
-        {{template "child02-1"}}{{include "parts/child02.html"}}
+        {{template "child01" .}}{{include "parts/child01.html"}}
+        {{template "child02-1" .}}{{include "parts/child02.html"}}
         {{template "child02-2" .}}
     </div>
 </body></html>
