@@ -37,7 +37,6 @@ func handleExample1(w http.ResponseWriter, r *http.Request) {
 			return strings.Repeat(s, i)
 		}}
 	tpl := template.Must(goingtpl.ParseFileFuncs("parent.html", funcMap))
-
 	// If you do not add a function
 	// e.g. goingtpl.ParseFile("xxx.html")
 
@@ -45,7 +44,10 @@ func handleExample1(w http.ResponseWriter, r *http.Request) {
 		"Date": time.Now().Format("2006-01-02"),
 		"Time": time.Now().Format("15:04:05"),
 	}
-	tpl.Execute(w, m)
+	err := tpl.Execute(w, m)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("ExecTime=%d MicroSec\n",
 		(time.Now().UnixNano()-start)/int64(time.Microsecond))
@@ -55,7 +57,6 @@ func handleExample2(w http.ResponseWriter, r *http.Request) {
 	start := time.Now().UnixNano()
 
 	tpl := template.Must(goingtpl.ParseFileFuncs("page1.html", nil))
-
 	// If you do not add a function
 	// e.g. goingtpl.ParseFile("xxx.html")
 
@@ -75,7 +76,11 @@ func handleExample2(w http.ResponseWriter, r *http.Request) {
 func handleExample3(w http.ResponseWriter, r *http.Request) {
 	start := time.Now().UnixNano()
 
-	tpl := template.Must(goingtpl.ParseFileFuncs("page2.html", nil))
+	funcMap := template.FuncMap{
+		"repeat": func(s string, i int) string {
+			return strings.Repeat(s, i)
+		}}
+	tpl := template.Must(goingtpl.ParseFileFuncs("page2.html", funcMap))
 
 	// If you do not add a function
 	// e.g. goingtpl.ParseFile("xxx.html")

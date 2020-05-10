@@ -1,7 +1,7 @@
 # goingtpl
 [Japanese here](https://github.com/playree/goingtpl/blob/master/README.JP.md)
 
-goingtpl is template parser that supports file inclusion.  
+goingtpl is template parser that supports file include and extends.  
 There is also a function to cache templates.
 
 ## Table of content
@@ -18,7 +18,7 @@ go get github.com/playree/goingtpl
 
 ## Usage
 ### Template include function
-Write `{{include xxx.html}}` in the template file.
+Write `{{include "xxx.html"}}` in the template file.
 ```html
 [parent.html]
 
@@ -39,6 +39,60 @@ Write `{{include xxx.html}}` in the template file.
 All you have to do is parse the parent file with the prepared method.
 ```go
 tpl := template.Must(goingtpl.ParseFile("parent.html"))
+```
+
+After parsing.
+```html
+<!DOCTYPE html>
+<html><body>
+    <h1>Test code</h1>
+	<p>Footer</p>
+</body></html>
+```
+
+### Template extends function
+Write `{{extends "xxx.html"}}` in the template file.
+```html
+[base.html]
+
+<!DOCTYPE html>
+<html><body>
+	<h1>{{template "title" .}}</h1>
+    <div style="background-color: #ddf;">
+		{{template "content" .}}
+	</div>
+	<p>Footer</p>
+</body></html>
+```
+
+```html
+[page1.html]
+
+{{extends "base.html"}}
+{{define "title"}}Page1{{end}}
+{{define "content"}}
+	<p>This is Page1.</p>
+{{end}}
+```
+
+Be sure to write `{{extends "xxx.html"}}` at the beginning.
+
+All you have to do is parse the file with the prepared method.
+
+```go
+tpl := template.Must(goingtpl.ParseFile("page1.html"))
+```
+
+After parsing.
+```html
+<!DOCTYPE html>
+<html><body>
+	<h1>Page1</h1>
+    <div style="background-color: #ddf;">
+		<p>This is Page1.</p>
+	</div>
+	<p>Footer</p>
+</body></html>
 ```
 
 ### Template caching function
@@ -86,6 +140,7 @@ func main() {
 	)
 
 	http.HandleFunc("/example1", handleExample1)
+	http.HandleFunc("/example2", handleExample2)
 	http.HandleFunc("/clear", handleClear)
 	log.Fatal(http.ListenAndServe(":8088", nil))
 }
@@ -105,7 +160,30 @@ func handleExample1(w http.ResponseWriter, r *http.Request) {
 		"Date": time.Now().Format("2006-01-02"),
 		"Time": time.Now().Format("15:04:05"),
 	}
-	tpl.Execute(w, m)
+	err := tpl.Execute(w, m)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("ExecTime=%d MicroSec\n",
+		(time.Now().UnixNano()-start)/int64(time.Microsecond))
+}
+
+func handleExample2(w http.ResponseWriter, r *http.Request) {
+	start := time.Now().UnixNano()
+
+	tpl := template.Must(goingtpl.ParseFileFuncs("page1.html", nil))
+	// If you do not add a function
+	// e.g. goingtpl.ParseFile("xxx.html")
+
+	m := map[string]string{
+		"Date": time.Now().Format("2006-01-02"),
+		"Time": time.Now().Format("15:04:05"),
+	}
+	err := tpl.Execute(w, m)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("ExecTime=%d MicroSec\n",
 		(time.Now().UnixNano()-start)/int64(time.Microsecond))
@@ -130,7 +208,7 @@ templates/parent.html
 </body></html>
 ```
 
-templates/child01.html
+templates/parts/child01.html
 ```html
 {{define "child01"}}
 <div>
@@ -142,7 +220,7 @@ templates/child01.html
 {{end}}
 ```
 
-templates/child02.html
+templates/parts/child02.html
 ```html
 {{define "child02-1"}}
 <div>child02.html - 1</div>
@@ -158,7 +236,7 @@ templates/child02.html
 {{end}}
 ```
 
-templates/child03.html
+templates/parts/child03.html
 ```html
 {{define "child03-1"}}
 <i>child03.html - 1</i>
@@ -171,9 +249,36 @@ Func now = {{now}}<br>
 Func repeat = {{repeat "A" 5}}
 {{end}}
 ```
+
+templates/parts/base.html
+```html
+<!DOCTYPE html>
+<html><body>
+	<h1>{{template "title" .}}</h1>
+	<p>This is a sample of extends.</p>
+	<div style="background-color: #ddf;">
+		{{template "content" .}}
+	</div>
+</body></html>
+```
+
+templates/page1.html
+```html
+{{extends "parts/base.html"}}
+{{define "title"}}Page1{{end}}
+{{define "content"}}
+	This is Page1.
+	<p>
+		Loaded {{.Date}} {{.Time}}
+	</p>
+{{end}}
+```
+
 Result of operation
 
-![Demo](https://user-images.githubusercontent.com/41541796/43353103-8f902b5a-926a-11e8-9234-1abb108ed30f.png)
+![Demo](https://user-images.githubusercontent.com/41541796/81497209-f5678100-92f7-11ea-91ac-d77e6add3ea6.png)
+
+![Demo](https://user-images.githubusercontent.com/41541796/81497214-fa2c3500-92f7-11ea-87a8-cc5ac48d1ce0.png)
 
 ## Licence
 [MIT](https://github.com/playree/goingtpl/blob/master/LICENSE)

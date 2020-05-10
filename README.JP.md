@@ -1,5 +1,5 @@
 # goingtpl
-`goingtpl`は、テンプレートファイルから別テンプレートファイルのインクルード記述をサポートしたテンプレートパッケージです。  
+`goingtpl`は、テンプレートファイルから別テンプレートファイルのインクルード(include)/継承(extends)記述をサポートしたテンプレートパッケージです。  
 ついでにテンプレートのキャッシュ機能も備えています。  
 `html/template`互換というか、テンプレートファイルをパースした結果は`template.Template`となっています。
 
@@ -17,7 +17,7 @@ go get github.com/playree/goingtpl
 
 ## Usage
 ### テンプレートのインクルード機能
-テンプレートファイルに`{{include xxx.html}}`を記述します。
+テンプレートファイルに`{{include "xxx.html"}}`を記述します。
 ```html
 [parent.html]
 
@@ -35,9 +35,65 @@ go get github.com/playree/goingtpl
 	<p>Footer</p>
 {{end}}
 ```
+
 あとは下記のように専用のパースメソッドを使用して、親となるテンプレートファイルをパースするだけで、`include`指定したファイルも一緒にパースされます。
+
 ```go
 tpl := template.Must(goingtpl.ParseFile("parent.html"))
+```
+
+パース後のHTMLは下記のようになります。
+```html
+<!DOCTYPE html>
+<html><body>
+    <h1>Test code</h1>
+	<p>Footer</p>
+</body></html>
+```
+
+### テンプレートの継承機能
+テンプレートファイルに`{{extends "xxx.html"}}`を記述します。
+```html
+[base.html]
+
+<!DOCTYPE html>
+<html><body>
+	<h1>{{template "title" .}}</h1>
+    <div style="background-color: #ddf;">
+		{{template "content" .}}
+	</div>
+	<p>Footer</p>
+</body></html>
+```
+
+```html
+[page1.html]
+
+{{extends "base.html"}}
+{{define "title"}}Page1{{end}}
+{{define "content"}}
+	<p>This is Page1.</p>
+{{end}}
+```
+
+`{{extends "xxx.html"}}`は必ず先頭に記載してください。
+
+あとは下記のように専用のパースメソッドを使用して、テンプレートファイルをパースするだけで、`extends`指定したファイルも一緒にパースされます。
+
+```go
+tpl := template.Must(goingtpl.ParseFile("page1.html"))
+```
+
+パース後のHTMLは下記のようになります。
+```html
+<!DOCTYPE html>
+<html><body>
+	<h1>Page1</h1>
+    <div style="background-color: #ddf;">
+		<p>This is Page1.</p>
+	</div>
+	<p>Footer</p>
+</body></html>
 ```
 
 ### テンプレートのキャッシュ機能
@@ -89,6 +145,7 @@ func main() {
 	)
 
 	http.HandleFunc("/example1", handleExample)
+	http.HandleFunc("/example2", handleExample2)
 	http.HandleFunc("/clear", handleClear)
 	log.Fatal(http.ListenAndServe(":8088", nil))
 }
@@ -108,7 +165,31 @@ func handleExample1(w http.ResponseWriter, r *http.Request) {
 		"Date": time.Now().Format("2006-01-02"),
 		"Time": time.Now().Format("15:04:05"),
 	}
-	tpl.Execute(w, m)
+	err := tpl.Execute(w, m)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("ExecTime=%d MicroSec\n",
+		(time.Now().UnixNano()-start)/int64(time.Microsecond))
+}
+
+func handleExample2(w http.ResponseWriter, r *http.Request) {
+	start := time.Now().UnixNano()
+
+	tpl := template.Must(goingtpl.ParseFileFuncs("page1.html", nil))
+
+	// If you do not add a function
+	// e.g. goingtpl.ParseFile("xxx.html")
+
+	m := map[string]string{
+		"Date": time.Now().Format("2006-01-02"),
+		"Time": time.Now().Format("15:04:05"),
+	}
+	err := tpl.Execute(w, m)
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("ExecTime=%d MicroSec\n",
 		(time.Now().UnixNano()-start)/int64(time.Microsecond))
@@ -133,7 +214,7 @@ templates/parent.html
 </body></html>
 ```
 
-templates/child01.html
+templates/parts/child01.html
 ```html
 {{define "child01"}}
 <div>
@@ -145,7 +226,7 @@ templates/child01.html
 {{end}}
 ```
 
-templates/child02.html
+templates/parts/child02.html
 ```html
 {{define "child02-1"}}
 <div>child02.html - 1</div>
@@ -161,7 +242,7 @@ templates/child02.html
 {{end}}
 ```
 
-templates/child03.html
+templates/parts/child03.html
 ```html
 {{define "child03-1"}}
 <i>child03.html - 1</i>
@@ -174,10 +255,36 @@ Func now = {{now}}<br>
 Func repeat = {{repeat "A" 5}}
 {{end}}
 ```
-下記が実行結果です。  
-親ファイルをパースしただけで、`include`指定したファイルもパースされているのが分かると思います。
 
-![Demo](https://user-images.githubusercontent.com/41541796/43353103-8f902b5a-926a-11e8-9234-1abb108ed30f.png)
+templates/parts/base.html
+```html
+<!DOCTYPE html>
+<html><body>
+	<h1>{{template "title" .}}</h1>
+	<p>This is a sample of extends.</p>
+	<div style="background-color: #ddf;">
+		{{template "content" .}}
+	</div>
+</body></html>
+```
+
+templates/page1.html
+```html
+{{extends "parts/base.html"}}
+{{define "title"}}Page1{{end}}
+{{define "content"}}
+	This is Page1.
+	<p>
+		Loaded {{.Date}} {{.Time}}
+	</p>
+{{end}}
+```
+
+下記が実行結果です。  
+
+![Demo](https://user-images.githubusercontent.com/41541796/81497209-f5678100-92f7-11ea-91ac-d77e6add3ea6.png)
+
+![Demo](https://user-images.githubusercontent.com/41541796/81497214-fa2c3500-92f7-11ea-87a8-cc5ac48d1ce0.png)
 
 ## Licence
 [MIT](https://github.com/playree/goingtpl/blob/master/LICENSE)
