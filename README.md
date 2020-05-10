@@ -71,7 +71,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/softplusjp/goingtpl"
+	"github.com/playree/goingtpl"
 )
 
 func main() {
