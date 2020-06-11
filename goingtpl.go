@@ -32,6 +32,11 @@ func SetBaseDir(dir string) {
 	}
 }
 
+// GetBaseDir Return BaseDir
+func GetBaseDir() string {
+	return baseDir
+}
+
 // EnableCache Enable template caching.
 // When the cache function is enabled, the template once read is cached in memory.
 // You can reduce disk access.
@@ -70,7 +75,7 @@ func ParseFileFuncs(filename string, funcs template.FuncMap) (*template.Template
 		}
 	}
 
-	tpl, err := nextParse(
+	tpl, err := nextParseFile(
 		template.New(filename).Funcs(funcMap).Funcs(funcs),
 		filename,
 		map[string]bool{},
@@ -87,14 +92,46 @@ func ParseFileFuncs(filename string, funcs template.FuncMap) (*template.Template
 	return tpl, nil
 }
 
-func nextParse(tpl *template.Template, filename string, comp map[string]bool) (*template.Template, error) {
+// ParseFuncs is template parser that supports file inclusion.
+// If BaseDIr is specified, specify a file path based on BaseDir.
+// e.g. {{include "xxx.html"}}
+func ParseFuncs(filename string, contents string, funcs template.FuncMap) (*template.Template, error) {
+	if cacheON {
+		// search template cache
+		if tpl, ok := tplCache[filename]; ok {
+			return tpl, nil
+		}
+	}
+
+	tpl, err := nextParse(
+		template.New(filename).Funcs(funcMap).Funcs(funcs),
+		filename,
+		contents,
+		map[string]bool{},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if cacheON {
+		// add template cache
+		tplCache[filename] = tpl
+	}
+
+	return tpl, nil
+}
+
+func nextParseFile(tpl *template.Template, filename string, comp map[string]bool) (*template.Template, error) {
 	buf, err := ioutil.ReadFile(baseDir + filename)
 	if err != nil {
 		return nil, err
 	}
-	contents := string(buf)
 
-	contents, tpl, err = nextExt(tpl, contents, comp)
+	return nextParse(tpl, filename, string(buf), comp)
+}
+
+func nextParse(tpl *template.Template, filename string, contents string, comp map[string]bool) (*template.Template, error) {
+	contents, tpl, err := nextExt(tpl, contents, comp)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +148,7 @@ func nextParse(tpl *template.Template, filename string, comp map[string]bool) (*
 			continue
 		}
 
-		tpl, err = nextParse(tpl, inc, comp)
+		tpl, err = nextParseFile(tpl, inc, comp)
 		if err != nil {
 			return nil, err
 		}
@@ -141,7 +178,7 @@ func nextExt(tpl *template.Template, contents string, comp map[string]bool) (str
 			end += start
 			param := strings.Fields(contents[start:end])
 			if len(param) == 2 && param[0] == extendsFuncString {
-				tpl, err := nextParse(tpl, strings.Trim(param[1], `"`), comp)
+				tpl, err := nextParseFile(tpl, strings.Trim(param[1], `"`), comp)
 				return contents[end+2:], tpl, err
 			}
 		}
